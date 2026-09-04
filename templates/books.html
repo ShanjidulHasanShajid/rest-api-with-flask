@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Books · Bookshelf{% endblock %}
+{% block page_id %}books{% endblock %}
+
+{% block content %}
+<header class="page-head">
+  <h1 class="page-title">Books</h1>
+  <p class="page-sub">Each book belongs to one author from your authors list.</p>
+</header>
+
+<div class="split">
+  <section class="panel form-panel">
+    <div class="panel-head">
+      <h2 class="panel-title" id="book-form-title">Add a book</h2>
+    </div>
+
+    <form id="book-form" class="form" autocomplete="off">
+      <input type="hidden" id="book-id" name="id" value="">
+
+      <div class="field">
+        <label for="book-title">Title</label>
+        <input type="text" id="book-title" name="title" required placeholder="Things Fall Apart">
+      </div>
+
+      <div class="field">
+        <label for="book-author">Author</label>
+        <select id="book-author" name="author_id" required>
+          <option value="">Choose an author</option>
+        </select>
+        <p class="hint" id="book-author-hint" hidden>Add an author first, then come back.</p>
+      </div>
+
+      <div class="field">
+        <label for="book-year">Year published</label>
+        <input type="number" id="book-year" name="published_year" min="0" max="2100" placeholder="1958">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="book-submit">Save book</button>
+        <button type="button" class="btn btn-quiet" id="book-cancel" hidden>Cancel</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2 class="panel-title">All books</h2>
+      <span class="count" id="book-count"></span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th class="num">ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th class="num">Year</th>
+            <th class="actions-col"></th>
+          </tr>
+        </thead>
+        <tbody id="book-rows">
+          <tr class="empty-row"><td colspan="5">No books yet. Add one on the left.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
