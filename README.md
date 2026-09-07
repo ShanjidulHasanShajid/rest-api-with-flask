@@ -7,9 +7,20 @@ This README is my note on **what i learnt** — the flow from the
 HTML on the page, to the JavaScript that calls the API, to the Flask route, to
 MySQL, and back onto the screen.
 
+## Layout
 
-
----
+```
+app.py               creates the app, registers the blueprints
+db.py                get_connection()
+config.py            MySQL credentials
+schema.sql           the two tables
+routes/pages.py      SSR pages:  /  /authors  /books
+routes/books.py      JSON API:   /api/books
+routes/authors.py    JSON API:   /api/authors
+templates/           Jinja: base, index, authors, books
+static/js/app.js     fetch + render — the API client
+static/css/          styling (served by Flask automatically, no route)
+```
 
 ## Run it
 
@@ -20,8 +31,6 @@ venv\Scripts\activate
 pip install -r requirements.txt
 python app.py          # http://127.0.0.1:5000
 ```
-
----
 
 ## How the app is wired
 
@@ -494,17 +503,3 @@ statement changes two tables.
 
 ---
 
-## Layout
-
-```
-app.py               creates the app, registers the blueprints
-db.py                get_connection()
-config.py            MySQL credentials
-schema.sql           the two tables
-routes/pages.py      SSR pages:  /  /authors  /books
-routes/books.py      JSON API:   /api/books
-routes/authors.py    JSON API:   /api/authors
-templates/           Jinja: base, index, authors, books
-static/js/app.js     fetch + render — the API client
-static/css/          styling (served by Flask automatically, no route)
-```
