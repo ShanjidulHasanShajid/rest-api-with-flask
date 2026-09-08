@@ -1,9 +1,21 @@
 from flask import Blueprint, jsonify
-from flask import request
 
 from db import get_connection
+from errors import ApiError
+from validators import author_payload
 
 authors_bp = Blueprint("authors", __name__, url_prefix="/api/authors")
+
+AUTHOR_QUERY = "SELECT id, name, country FROM authors"
+
+
+def fetch_author(cursor, author_id):
+    """One author, or a 404. Used by GET, POST and PUT."""
+    cursor.execute(AUTHOR_QUERY + " WHERE id = %s", (author_id,))
+    author = cursor.fetchone()
+    if author is None:
+        raise ApiError(404, f"No author with id {author_id}.")
+    return author
 
 
 @authors_bp.route("", methods=["GET"])
@@ -11,41 +23,27 @@ def list_authors():
     connection = get_connection()
     cursor = connection.cursor(dictionary=True, buffered=True)
     try:
-        cursor.execute("SELECT id, name, country FROM authors ORDER BY name")
-        authors = cursor.fetchall()
-        return jsonify(authors), 200
+        cursor.execute(AUTHOR_QUERY + " ORDER BY name")
+        return jsonify(cursor.fetchall()), 200
     finally:
         cursor.close()
         connection.close()
+
 
 @authors_bp.route("/<int:author_id>", methods=["GET"])
 def get_author(author_id):
     connection = get_connection()
     cursor = connection.cursor(dictionary=True, buffered=True)
     try:
-        cursor.execute(
-            "SELECT id, name, country FROM authors WHERE id = %s",
-            (author_id,),
-        )
-        author = cursor.fetchone()
-
-        if author is None:
-            return jsonify({"error": "Author not found."}), 404
-
-        return jsonify(author), 200
+        return jsonify(fetch_author(cursor, author_id)), 200
     finally:
         cursor.close()
         connection.close()
 
+
 @authors_bp.route("", methods=["POST"])
 def create_author():
-    data = request.get_json(silent=True) or {}
-
-    name = (data.get("name") or "").strip()
-    country = (data.get("country") or "").strip() or None
-
-    if not name:
-        return jsonify({"error": "Name is required."}), 400
+    name, country = author_payload()          # 415 / 400 / 422 raised in here
 
     connection = get_connection()
     cursor = connection.cursor(dictionary=True, buffered=True)
@@ -55,52 +53,30 @@ def create_author():
             (name, country),
         )
         connection.commit()
-        new_id = cursor.lastrowid
-
-        cursor.execute(
-            "SELECT id, name, country FROM authors WHERE id = %s",
-            (new_id,),
-        )
-        author = cursor.fetchone()
-
-        return jsonify(author), 201
+        return jsonify(fetch_author(cursor, cursor.lastrowid)), 201
     finally:
         cursor.close()
         connection.close()
 
+
 @authors_bp.route("/<int:author_id>", methods=["PUT"])
 def update_author(author_id):
-    data = request.get_json(silent=True) or {}
-
-    name = (data.get("name") or "").strip()
-    country = (data.get("country") or "").strip() or None
-
-    if not name:
-        return jsonify({"error": "Name is required."}), 400
+    name, country = author_payload()
 
     connection = get_connection()
     cursor = connection.cursor(dictionary=True, buffered=True)
     try:
-        cursor.execute("SELECT id FROM authors WHERE id = %s", (author_id,))
-        if cursor.fetchone() is None:
-            return jsonify({"error": "Author not found."}), 404
-
+        fetch_author(cursor, author_id)       # 404 if the author is gone
         cursor.execute(
             "UPDATE authors SET name = %s, country = %s WHERE id = %s",
             (name, country, author_id),
         )
         connection.commit()
-
-        cursor.execute(
-            "SELECT id, name, country FROM authors WHERE id = %s",
-            (author_id,),
-        )
-        author = cursor.fetchone()
-
-        return jsonify(author), 200
+        return jsonify(fetch_author(cursor, author_id)), 200
     finally:
         cursor.close()
         connection.close()
+
 
 @authors_bp.route("/<int:author_id>", methods=["DELETE"])
 def delete_author(author_id):
@@ -111,9 +87,9 @@ def delete_author(author_id):
         connection.commit()
 
         if cursor.rowcount == 0:
-            return jsonify({"error": "Author not found."}), 404
+            raise ApiError(404, f"No author with id {author_id}.")
 
-        return jsonify({"message": "Author deleted."}), 200
+        return jsonify({"message": f"Author {author_id} deleted."}), 200
     finally:
         cursor.close()
         connection.close()
