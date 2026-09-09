@@ -4,9 +4,9 @@ from db import get_connection
 from errors import ApiError
 from validators import author_payload
 
-authors_bp = Blueprint("authors", __name__, url_prefix="/api/authors")
+authors_bp = Blueprint("authors", __name__, url_prefix="/authors")
 
-AUTHOR_QUERY = "SELECT id, name, country FROM authors"
+AUTHOR_QUERY = "SELECT * FROM authors"
 
 
 def fetch_author(cursor, author_id):
@@ -24,7 +24,8 @@ def list_authors():
     cursor = connection.cursor(dictionary=True, buffered=True)
     try:
         cursor.execute(AUTHOR_QUERY + " ORDER BY name")
-        return jsonify(cursor.fetchall()), 200
+        authors = cursor.fetchall()
+        return jsonify([a["name"] for a in authors]), 200      # ["Chinua Achebe", "Jhumpa Lahiri"]
     finally:
         cursor.close()
         connection.close()

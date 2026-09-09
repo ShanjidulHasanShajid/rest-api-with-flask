@@ -4,7 +4,7 @@ from db import get_connection
 from errors import ApiError
 from validators import book_payload
 
-books_bp = Blueprint("books", __name__, url_prefix="/api/books")
+books_bp = Blueprint("books", __name__, url_prefix="/books")
 
 BOOK_QUERY = """
     SELECT books.id, books.title, books.published_year, books.author_id,
