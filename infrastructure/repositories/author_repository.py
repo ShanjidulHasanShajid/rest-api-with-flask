@@ -1,9 +1,12 @@
 from typing import List, Optional
-from models.author import Author
+
+from domain.entities import Author
+from domain.repositories import AuthorRepository
 
 AUTHOR_COLUMNS = "id, name, country"
 
-class AuthorRepository:
+
+class MySQLAuthorRepository(AuthorRepository):
     def __init__(self, connection):
         self.connection = connection
 

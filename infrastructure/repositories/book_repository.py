@@ -1,5 +1,7 @@
 from typing import List, Optional
-from models.book import Book
+
+from domain.entities import Book
+from domain.repositories import BookRepository
 
 BOOK_QUERY = """
     SELECT books.id, books.title, books.published_year, books.author_id,
@@ -9,7 +11,7 @@ BOOK_QUERY = """
 """
 
 
-class BookRepository:
+class MySQLBookRepository(BookRepository):
     def __init__(self, connection):
         self.connection = connection
 

@@ -1,5 +1,4 @@
-# from models.author import Author
-# from models.book import Book
+# from domain.entities import Author, Book
 
 # a = Author.from_row({"id": 1, "name": "Chinua Achebe", "country": "Nigeria"})
 # print(a)                 # Author(id=1, name='Chinua Achebe', country='Nigeria')
@@ -14,11 +13,11 @@
 
 
 
-# from db import get_connection
-# from repositories.author_repository import AuthorRepository
+# from infrastructure.database import get_connection
+# from infrastructure.repositories.author_repository import MySQLAuthorRepository
 
 # conn = get_connection()
-# repo = AuthorRepository(conn)
+# repo = MySQLAuthorRepository(conn)
 
 # print(repo.find_all())
 # print(repo.find_by_id(1))
@@ -30,25 +29,4 @@
 # print(repo.update(new.id, "Toni Morrison", "USA"))
 # print(repo.delete(new.id))            # True
 # print(repo.delete(new.id))            # False — already gone
-# conn.close()
-
-
-# from db import get_connection
-# from repositories.author_repository import AuthorRepository
-# from repositories.book_repository import BookRepository
-# from services.book_service import BookService
-# from errors import ApiError
-
-# conn = get_connection()
-# service = BookService(BookRepository(conn), AuthorRepository(conn))
-
-# print(service.list_books())
-
-# try:
-#     service.create_book("Bad Book", 2000, 9999)   # no such author
-# except ApiError as err:
-#     print(err.status, err.message, err.fields)    # 422 ... {'author_id': '...'}
-
-# book = service.create_book("Arrow of God", 1964, 1)
-# print(book)
 # conn.close()

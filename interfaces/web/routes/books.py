@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 
-from factories import make_book_service
-from validators import book_payload
+from container import make_book_service
+from interfaces.web.validators import book_payload
 
 books_bp = Blueprint("books", __name__, url_prefix="/books")
 

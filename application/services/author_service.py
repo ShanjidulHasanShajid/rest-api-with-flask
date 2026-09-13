@@ -1,5 +1,5 @@
-from errors import ApiError
-from repositories.author_repository import AuthorRepository
+from domain.exceptions import NotFoundError
+from domain.repositories import AuthorRepository
 
 
 class AuthorService:
@@ -12,7 +12,7 @@ class AuthorService:
     def get_author(self, author_id: int):
         author = self.repository.find_by_id(author_id)
         if author is None:
-            raise ApiError(404, f"No author with id {author_id}.")
+            raise NotFoundError("author", author_id)
         return author
 
     def create_author(self, name: str, country):
@@ -25,4 +25,4 @@ class AuthorService:
     def delete_author(self, author_id: int):
         deleted = self.repository.delete(author_id)
         if not deleted:
-            raise ApiError(404, f"No author with id {author_id}.")
+            raise NotFoundError("author", author_id)

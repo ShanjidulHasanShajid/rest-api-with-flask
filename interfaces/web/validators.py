@@ -2,7 +2,7 @@
 
 from flask import request
 
-from errors import ApiError
+from interfaces.web.errors import WebError
 
 MAX_TITLE = 200
 MAX_NAME = 120
@@ -10,17 +10,17 @@ MAX_COUNTRY = 80
 
 
 def json_body():
-    """The request body as a dict, or an ApiError explaining why it isn't."""
+    """The request body as a dict, or a WebError explaining why it isn't."""
     if not request.is_json:
-        raise ApiError(415, "Send Content-Type: application/json.")
+        raise WebError(415, "Send Content-Type: application/json.")
 
     data = request.get_json(silent=True)
 
     if data is None:
-        raise ApiError(400, "The request body is not valid JSON.", "MALFORMED_JSON")
+        raise WebError(400, "The request body is not valid JSON.", "MALFORMED_JSON")
 
     if not isinstance(data, dict):
-        raise ApiError(400, "The request body must be a JSON object.", "MALFORMED_JSON")
+        raise WebError(400, "The request body must be a JSON object.", "MALFORMED_JSON")
 
     return data
 
@@ -92,7 +92,7 @@ def book_payload():
     year = _int(data, "published_year", fields, required=False, minimum=1, maximum=2100)
 
     if fields:
-        raise ApiError(422, "Some fields are invalid.", fields=fields)
+        raise WebError(422, "Some fields are invalid.", fields=fields)
 
     return title, year, author_id
 
@@ -107,6 +107,6 @@ def author_payload():
     country = _text(data, "country", fields, required=False, max_length=MAX_COUNTRY)
 
     if fields:
-        raise ApiError(422, "Some fields are invalid.", fields=fields)
+        raise WebError(422, "Some fields are invalid.", fields=fields)
 
     return name, country

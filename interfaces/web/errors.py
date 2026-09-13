@@ -1,10 +1,12 @@
-"""Everything about failure responses lives here."""
+"""Everything about failure responses lives here. Maps domain and web errors to JSON."""
 
 import logging
 
 import mysql.connector
 from flask import jsonify, request
 from werkzeug.exceptions import HTTPException
+
+from domain.exceptions import NotFoundError, ValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -20,8 +22,8 @@ DEFAULT_CODES = {
 }
 
 
-class ApiError(Exception):
-    """Raise this anywhere and the matching JSON response is sent."""
+class WebError(Exception):
+    """Raise this anywhere in the web layer and the matching JSON response is sent."""
 
     def __init__(self, status, message, code=None, fields=None):
         super().__init__(message)
@@ -42,13 +44,21 @@ def wants_json():
 
 
 def json_error(status, message, code=None, fields=None):
-    return ApiError(status, message, code, fields).to_response()
+    return WebError(status, message, code, fields).to_response()
 
 
 def register_error_handlers(app):
-    @app.errorhandler(ApiError)
-    def handle_api_error(err):
+    @app.errorhandler(WebError)
+    def handle_web_error(err):
         return err.to_response()
+
+    @app.errorhandler(NotFoundError)
+    def handle_not_found(err):
+        return json_error(404, str(err))
+
+    @app.errorhandler(ValidationError)
+    def handle_validation(err):
+        return json_error(422, err.message, fields=err.fields)
 
     @app.errorhandler(404)
     def handle_404(err):

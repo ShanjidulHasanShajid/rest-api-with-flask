@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify
-from factories import make_author_service
-from validators import author_payload
+
+from container import make_author_service
+from interfaces.web.validators import author_payload
 
 authors_bp = Blueprint("authors", __name__, url_prefix="/authors")
 

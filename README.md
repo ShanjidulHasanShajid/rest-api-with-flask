@@ -9,17 +9,34 @@ MySQL, and back onto the screen.
 
 ## Layout
 
+Clean Architecture: dependencies point inward. `domain` knows nothing about
+Flask or MySQL; `application` knows only `domain`; `infrastructure` and
+`interfaces` are the swappable outer layers that implement/drive it.
+
 ```
-app.py               creates the app, registers the blueprints
-db.py                get_connection()
-config.py            MySQL credentials
-schema.sql           the two tables
-routes/pages.py      SSR pages:  /  /authors  /books
-routes/books.py      JSON API:   /api/books
-routes/authors.py    JSON API:   /api/authors
-templates/           Jinja: base, index, authors, books
-static/js/app.js     fetch + render — the API client
-static/css/          styling (served by Flask automatically, no route)
+app.py                                   entry point — builds the app and runs it
+container.py                             composition root — wires infrastructure into application
+
+domain/
+  entities/author.py, entities/book.py   plain dataclasses, no framework code
+  exceptions.py                          NotFoundError, ValidationError — framework-agnostic
+  repositories/                          abstract repository interfaces (the ports)
+
+application/
+  services/author_service.py             use cases, depend only on domain interfaces
+  services/book_service.py
+
+infrastructure/
+  config.py, database.py                 MySQL credentials + get_connection()
+  repositories/                          MySQL implementations of the domain repository ports
+
+interfaces/web/
+  app.py                                 create_app() — registers blueprints + error handlers
+  errors.py                              maps domain/web exceptions to JSON responses
+  validators.py                          turns request JSON into clean values
+  routes/authors.py, routes/books.py     JSON API: /api/authors, /api/books
+
+schema.sql                               the two tables
 ```
 
 ## Run it

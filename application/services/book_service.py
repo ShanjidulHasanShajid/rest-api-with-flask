@@ -1,6 +1,5 @@
-from errors import ApiError
-from repositories.author_repository import AuthorRepository
-from repositories.book_repository import BookRepository
+from domain.exceptions import NotFoundError, ValidationError
+from domain.repositories import AuthorRepository, BookRepository
 
 
 class BookService:
@@ -14,13 +13,15 @@ class BookService:
     def get_book(self, book_id: int):
         book = self.books.find_by_id(book_id)
         if book is None:
-            raise ApiError(404, f"No book with id {book_id}.")
+            raise NotFoundError("book", book_id)
         return book
 
     def _require_author(self, author_id: int):
         if not self.authors.exists(author_id):
-            raise ApiError(422, "Some fields are invalid.",
-                            fields={"author_id": f"No author with id {author_id}."})
+            raise ValidationError(
+                "Some fields are invalid.",
+                fields={"author_id": f"No author with id {author_id}."},
+            )
 
     def create_book(self, title: str, published_year, author_id: int):
         self._require_author(author_id)
@@ -34,4 +35,4 @@ class BookService:
     def delete_book(self, book_id: int):
         deleted = self.books.delete(book_id)
         if not deleted:
-            raise ApiError(404, f"No book with id {book_id}.")
+            raise NotFoundError("book", book_id)
